@@ -1,0 +1,76 @@
+*Task
+*Build a program named ZBC ## _ Pers_info (where ## is your number) with these input parameters
+*Full name
+*Birthday
+*Gender (radio button) M / F
+*To be displayed:
+*The initials of the person separated by dots
+*His age on 18/02/2021
+*His Gender (Male / Female)
+
+*&---------------------------------------------------------------------*
+*& Report ZBC12_PERS_INFO
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc12_pers_info.
+
+SELECTION-SCREEN BEGIN OF BLOCK block WITH FRAME TITLE TEXT-t01.
+PARAMETERS p_name TYPE string  OBLIGATORY.
+PARAMETERS birth TYPE sy-datum.
+PARAMETERS r1 RADIOBUTTON GROUP rad DEFAULT 'X'.
+PARAMETERS r2 RADIOBUTTON GROUP rad.
+SELECTION-SCREEN END OF BLOCK block.
+
+DATA firstn TYPE c.
+DATA lastn TYPE c.
+DATA inic TYPE string.
+DATA :
+  days   TYPE num2,
+  months TYPE num2,
+  years  TYPE num2.
+
+*messazh errori per jo shkronja
+IF p_name CA '*/ + - ? ! % ( ) = 0123456789'.
+  WRITE:'Only letters are allowed. No numbers or special characters'.
+ENDIF.
+
+*NDARJA E FJALIS NE FJAL
+SPLIT p_name AT space INTO firstn lastn .
+
+*BASHKIM I STRINGJEVE
+CONCATENATE  firstn  lastn INTO inic SEPARATED BY space.
+
+*ZEVENDESIM I HAPSIRES ME PIK
+REPLACE ALL OCCURRENCES OF ` ` IN inic WITH '.'.
+WRITE inic.
+NEW-LINE.
+
+*FUNKSIONI I MOSHES
+CALL FUNCTION 'HRCM_TIME_PERIOD_CALCULATE'
+  EXPORTING
+    begda         = birth
+    endda         = sy-datum
+  IMPORTING
+    noyrs         = years
+    nomns         = months
+    nodys         = days
+  EXCEPTIONS
+    invalid_dates = 1
+    overflow      = 2
+    OTHERS        = 3.
+
+
+*afishimi i moshes me day months dhe year ne formatin 12/12/12.
+WRITE : / days , '/' , months , '/' , years.
+NEW-LINE.
+WRITE : /  years , 'years' , months , 'months' , days , 'days'.
+NEW-LINE.
+
+
+*AFISHIN I RADIOBUTTON
+IF r1 = 'X'.
+  WRITE : p_name ,'IS A FEMALE'.
+ELSEIF r2 = 'X'.
+  WRITE : p_name ,'IS A MALE'.
+ENDIF.
